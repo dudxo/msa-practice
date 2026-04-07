@@ -1,0 +1,26 @@
+services:
+  user-db:
+    image: mysql:8.0
+    container_name: user-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: user_db
+    ports:
+      - "3321:3306"
+    volumes:
+      - user-db-data:/var/lib/mysql
+
+  board-db:
+    image: mysql:8.0
+    container_name: board-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: board_db
+    ports:
+      - "3322:3306"
+    volumes:
+      - board-db-data:/var/lib/mysql
+
+volumes:
+  user-db-data:
+  board-db-data:
