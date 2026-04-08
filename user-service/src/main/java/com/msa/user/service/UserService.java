@@ -1,5 +1,6 @@
 package com.msa.user.service;
 
+import com.msa.user.client.PointServiceClient;
 import com.msa.user.dto.CreateUserRequest;
 import com.msa.user.dto.UserResponse;
 import com.msa.user.entity.User;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PointServiceClient pointServiceClient;
 
     @Transactional
     public UserResponse createUser(CreateUserRequest request) {
@@ -30,6 +32,7 @@ public class UserService {
                 .build();
 
         User savedUser = userRepository.save(user);
+        pointServiceClient.earnPoints(savedUser.getId(), 500, "가입 축하 포인트");
         return UserResponse.from(savedUser);
     }
 

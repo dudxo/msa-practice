@@ -1,5 +1,6 @@
 package com.msa.user.service;
 
+import com.msa.user.client.PointServiceClient;
 import com.msa.user.dto.CreateUserRequest;
 import com.msa.user.dto.UserResponse;
 import com.msa.user.entity.User;
@@ -23,6 +24,9 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PointServiceClient pointServiceClient;
 
     @InjectMocks
     private UserService userService;

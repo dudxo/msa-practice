@@ -1,6 +1,8 @@
 package com.msa.board.service;
 
+import com.msa.board.client.PointServiceClient;
 import com.msa.board.client.UserServiceClient;
+import com.msa.board.event.BoardEventProducer;
 import com.msa.board.dto.BoardResponse;
 import com.msa.board.entity.Board;
 import com.msa.board.repository.BoardRepository;
@@ -28,6 +30,12 @@ class BoardServiceCommunicationTest {
 
     @Mock
     private UserServiceClient userServiceClient;
+
+    @Mock
+    private PointServiceClient pointServiceClient;
+
+    @Mock
+    private BoardEventProducer boardEventProducer;
 
     @InjectMocks
     private BoardService boardService;
