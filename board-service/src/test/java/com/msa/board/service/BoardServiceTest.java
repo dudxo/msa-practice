@@ -7,6 +7,7 @@ import com.msa.board.dto.CreateBoardRequest;
 import com.msa.board.dto.BoardResponse;
 import com.msa.board.entity.Board;
 import com.msa.board.repository.BoardRepository;
+import com.msa.board.repository.UserInfoRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,6 +40,9 @@ class BoardServiceTest {
     @Mock
     private BoardEventProducer boardEventProducer;
 
+    @Mock
+    private UserInfoRepository userInfoRepository;
+
     @InjectMocks
     private BoardService boardService;
 
@@ -55,6 +59,7 @@ class BoardServiceTest {
                 .authorId(1L)
                 .build();
         given(boardRepository.save(any(Board.class))).willReturn(savedBoard);
+        given(userInfoRepository.findByUserId(1L)).willReturn(Optional.empty());
         given(userServiceClient.getUserName(1L)).willReturn("홍길동");
 
         // when
@@ -78,6 +83,7 @@ class BoardServiceTest {
                 .authorId(1L)
                 .build();
         given(boardRepository.findById(1L)).willReturn(Optional.of(board));
+        given(userInfoRepository.findByUserId(1L)).willReturn(Optional.empty());
         given(userServiceClient.getUserName(1L)).willReturn("홍길동");
 
         // when
@@ -109,8 +115,9 @@ class BoardServiceTest {
         Board board1 = Board.builder().id(1L).title("제목1").content("내용1").authorId(1L).build();
         Board board2 = Board.builder().id(2L).title("제목2").content("내용2").authorId(2L).build();
         given(boardRepository.findAll()).willReturn(List.of(board1, board2));
-        given(userServiceClient.getUserNamesByIds(anyList()))
-                .willReturn(Map.of(1L, "홍길동", 2L, "김철수"));
+        given(userInfoRepository.findAllByUserIdIn(anyList())).willReturn(Collections.emptyList());
+        given(userServiceClient.getUserName(1L)).willReturn("홍길동");
+        given(userServiceClient.getUserName(2L)).willReturn("김철수");
 
         // when
         List<BoardResponse> responses = boardService.getAllBoards();

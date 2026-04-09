@@ -4,6 +4,7 @@ import com.msa.user.client.PointServiceClient;
 import com.msa.user.dto.CreateUserRequest;
 import com.msa.user.dto.UserResponse;
 import com.msa.user.entity.User;
+import com.msa.user.event.UserEventProducer;
 import com.msa.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PointServiceClient pointServiceClient;
+    private final UserEventProducer userEventProducer;
 
     @Transactional
     public UserResponse createUser(CreateUserRequest request) {
@@ -33,6 +35,7 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
         pointServiceClient.earnPoints(savedUser.getId(), 500, "가입 축하 포인트");
+        userEventProducer.publishUserCreated(savedUser.getId(), savedUser.getName(), savedUser.getEmail());
         return UserResponse.from(savedUser);
     }
 

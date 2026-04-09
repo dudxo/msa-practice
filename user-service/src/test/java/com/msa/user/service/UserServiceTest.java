@@ -4,6 +4,7 @@ import com.msa.user.client.PointServiceClient;
 import com.msa.user.dto.CreateUserRequest;
 import com.msa.user.dto.UserResponse;
 import com.msa.user.entity.User;
+import com.msa.user.event.UserEventProducer;
 import com.msa.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,9 @@ class UserServiceTest {
 
     @Mock
     private PointServiceClient pointServiceClient;
+
+    @Mock
+    private UserEventProducer userEventProducer;
 
     @InjectMocks
     private UserService userService;

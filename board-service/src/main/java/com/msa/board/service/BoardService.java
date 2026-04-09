@@ -7,7 +7,9 @@ import com.msa.board.event.BoardCreatedEvent;
 import com.msa.board.event.BoardEventProducer;
 import com.msa.board.dto.BoardResponse;
 import com.msa.board.entity.Board;
+import com.msa.board.entity.UserInfo;
 import com.msa.board.repository.BoardRepository;
+import com.msa.board.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ public class BoardService {
     private final UserServiceClient userServiceClient;
     private final PointServiceClient pointServiceClient;
     private final BoardEventProducer boardEventProducer;
+    private final UserInfoRepository userInfoRepository;
 
     @Transactional
     public BoardResponse createBoard(CreateBoardRequest request) {
@@ -48,7 +51,7 @@ public class BoardService {
                     savedBoard.getCreatedAt()
             ));
 
-            String authorName = userServiceClient.getUserName(savedBoard.getAuthorId());
+            String authorName = resolveAuthorName(savedBoard.getAuthorId());
             return BoardResponse.from(savedBoard, authorName);
         } catch (Exception e) {
             // Saga 보상 트랜잭션: 차감한 포인트 환불
@@ -61,20 +64,30 @@ public class BoardService {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다. id=" + id));
 
-        String authorName = userServiceClient.getUserName(board.getAuthorId());
+        String authorName = resolveAuthorName(board.getAuthorId());
         return BoardResponse.from(board, authorName);
     }
 
     public List<BoardResponse> getAllBoards() {
         List<Board> boards = boardRepository.findAll();
 
-        // Batch API로 N+1 방지: authorId 목록을 한 번에 조회
+        // 작성자 ID 목록 추출
         List<Long> authorIds = boards.stream()
                 .map(Board::getAuthorId)
                 .distinct()
                 .collect(Collectors.toList());
 
-        Map<Long, String> authorNames = userServiceClient.getUserNamesByIds(authorIds);
+        // 1차: 로컬 UserInfo에서 조회
+        Map<Long, String> authorNames = userInfoRepository.findAllByUserIdIn(authorIds).stream()
+                .collect(Collectors.toMap(UserInfo::getUserId, UserInfo::getName));
+
+        // 2차: 로컬에 없는 작성자는 REST Fallback
+        for (Long authorId : authorIds) {
+            if (!authorNames.containsKey(authorId)) {
+                String name = userServiceClient.getUserName(authorId);
+                authorNames.put(authorId, name);
+            }
+        }
 
         return boards.stream()
                 .map(board -> BoardResponse.from(
@@ -82,5 +95,14 @@ public class BoardService {
                         authorNames.getOrDefault(board.getAuthorId(), "알 수 없음")
                 ))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 로컬 UserInfo 우선 조회, 없으면 REST Fallback
+     */
+    private String resolveAuthorName(Long authorId) {
+        return userInfoRepository.findByUserId(authorId)
+                .map(UserInfo::getName)
+                .orElseGet(() -> userServiceClient.getUserName(authorId));
     }
 }

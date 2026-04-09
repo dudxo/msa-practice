@@ -7,12 +7,15 @@ import com.msa.board.dto.BoardResponse;
 import com.msa.board.dto.CreateBoardRequest;
 import com.msa.board.entity.Board;
 import com.msa.board.repository.BoardRepository;
+import com.msa.board.repository.UserInfoRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -37,6 +40,9 @@ class BoardServiceSagaTest {
 
     @Mock
     private BoardEventProducer boardEventProducer;
+
+    @Mock
+    private UserInfoRepository userInfoRepository;
 
     @InjectMocks
     private BoardService boardService;
@@ -85,6 +91,7 @@ class BoardServiceSagaTest {
 
         willDoNothing().given(pointServiceClient).deductPoints(1L, 100, "게시글 작성");
         given(boardRepository.save(any(Board.class))).willReturn(savedBoard);
+        given(userInfoRepository.findByUserId(1L)).willReturn(Optional.empty());
         given(userServiceClient.getUserName(1L)).willReturn("홍길동");
 
         // when
