@@ -3,6 +3,7 @@ package com.msa.user.service;
 import com.msa.user.dto.UserResponse;
 import com.msa.user.entity.User;
 import com.msa.user.repository.UserRepository;
+import com.msa.user.util.JwtUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

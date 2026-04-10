@@ -6,6 +6,7 @@ import com.msa.user.dto.UserResponse;
 import com.msa.user.entity.User;
 import com.msa.user.event.UserEventProducer;
 import com.msa.user.repository.UserRepository;
+import com.msa.user.util.JwtUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +33,9 @@ class UserServiceTest {
     @Mock
     private UserEventProducer userEventProducer;
 
+    @Mock
+    private JwtUtil jwtUtil;
+
     @InjectMocks
     private UserService userService;
 
@@ -40,11 +44,9 @@ class UserServiceTest {
     @DisplayName("정상 요청으로 회원가입하면 UserResponse가 반환된다")
     void createUser_success() {
         // given
-        CreateUserRequest request = new CreateUserRequest("홍길동", "hong@test.com");
+        CreateUserRequest request = new CreateUserRequest("홍길동", "hong@test.com", "password123");
         User savedUser = User.builder()
-                .id(1L)
-                .name("홍길동")
-                .email("hong@test.com")
+                .id(1L).name("홍길동").email("hong@test.com").password("password123")
                 .build();
         given(userRepository.existsByEmail("hong@test.com")).willReturn(false);
         given(userRepository.save(any(User.class))).willReturn(savedUser);
@@ -63,7 +65,7 @@ class UserServiceTest {
     @DisplayName("이메일이 중복이면 예외가 발생한다")
     void createUser_duplicateEmail_throwsException() {
         // given
-        CreateUserRequest request = new CreateUserRequest("홍길동", "hong@test.com");
+        CreateUserRequest request = new CreateUserRequest("홍길동", "hong@test.com", "password123");
         given(userRepository.existsByEmail("hong@test.com")).willReturn(true);
 
         // when & then
@@ -78,9 +80,7 @@ class UserServiceTest {
     void getUser_success() {
         // given
         User user = User.builder()
-                .id(1L)
-                .name("홍길동")
-                .email("hong@test.com")
+                .id(1L).name("홍길동").email("hong@test.com").password("password123")
                 .build();
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
 

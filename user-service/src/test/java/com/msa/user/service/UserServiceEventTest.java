@@ -5,6 +5,7 @@ import com.msa.user.dto.CreateUserRequest;
 import com.msa.user.entity.User;
 import com.msa.user.event.UserEventProducer;
 import com.msa.user.repository.UserRepository;
+import com.msa.user.util.JwtUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +31,9 @@ class UserServiceEventTest {
     @Mock
     private UserEventProducer userEventProducer;
 
+    @Mock
+    private JwtUtil jwtUtil;
+
     @InjectMocks
     private UserService userService;
 
@@ -37,12 +41,10 @@ class UserServiceEventTest {
     @DisplayName("회원가입 시 user-created 이벤트가 발행된다")
     void createUser_publishesUserCreatedEvent() {
         // given
-        CreateUserRequest request = new CreateUserRequest("테스트", "test@test.com");
+        CreateUserRequest request = new CreateUserRequest("테스트", "test@test.com", "password123");
 
         User savedUser = User.builder()
-                .id(1L)
-                .name("테스트")
-                .email("test@test.com")
+                .id(1L).name("테스트").email("test@test.com").password("password123")
                 .build();
 
         given(userRepository.existsByEmail("test@test.com")).willReturn(false);
@@ -51,7 +53,7 @@ class UserServiceEventTest {
         // when
         userService.createUser(request);
 
-        // then — 이벤트 발행 검증
+        // then
         ArgumentCaptor<Long> idCaptor = ArgumentCaptor.forClass(Long.class);
         ArgumentCaptor<String> nameCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class);

@@ -1,6 +1,8 @@
 package com.msa.user.controller;
 
 import com.msa.user.dto.CreateUserRequest;
+import com.msa.user.dto.LoginRequest;
+import com.msa.user.dto.LoginResponse;
 import com.msa.user.dto.UserResponse;
 import com.msa.user.service.UserService;
 import jakarta.validation.Valid;
@@ -19,6 +21,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse createUser(@RequestBody @Valid CreateUserRequest request) {
         return userService.createUser(request);
+    }
+
+    @PostMapping("/login")
+    public LoginResponse login(@RequestBody @Valid LoginRequest request) {
+        return userService.login(request);
     }
 
     @GetMapping("/{id}")

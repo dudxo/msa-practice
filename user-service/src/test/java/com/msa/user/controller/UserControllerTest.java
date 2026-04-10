@@ -38,7 +38,7 @@ class UserControllerTest {
     @DisplayName("POST /users - 정상 요청이면 201 반환")
     void createUser_success() throws Exception {
         // given
-        CreateUserRequest request = new CreateUserRequest("홍길동", "hong@test.com");
+        CreateUserRequest request = new CreateUserRequest("홍길동", "hong@test.com", "password123");
         UserResponse response = new UserResponse(1L, "홍길동", "hong@test.com", LocalDateTime.now());
         given(userService.createUser(any())).willReturn(response);
 
@@ -56,7 +56,7 @@ class UserControllerTest {
     @DisplayName("POST /users - 이름이 빈값이면 400 반환")
     void createUser_blankName_returns400() throws Exception {
         // given
-        CreateUserRequest request = new CreateUserRequest("", "hong@test.com");
+        CreateUserRequest request = new CreateUserRequest("", "hong@test.com", "password123");
 
         // when & then
         mockMvc.perform(post("/users")
@@ -70,7 +70,7 @@ class UserControllerTest {
     @DisplayName("POST /users - 이메일 형식이 잘못되면 400 반환")
     void createUser_invalidEmail_returns400() throws Exception {
         // given
-        CreateUserRequest request = new CreateUserRequest("홍길동", "invalid-email");
+        CreateUserRequest request = new CreateUserRequest("홍길동", "invalid-email", "password123");
 
         // when & then
         mockMvc.perform(post("/users")

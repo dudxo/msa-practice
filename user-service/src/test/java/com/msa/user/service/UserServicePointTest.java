@@ -6,6 +6,7 @@ import com.msa.user.dto.UserResponse;
 import com.msa.user.entity.User;
 import com.msa.user.event.UserEventProducer;
 import com.msa.user.repository.UserRepository;
+import com.msa.user.util.JwtUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.verify;
@@ -31,6 +31,9 @@ class UserServicePointTest {
     @Mock
     private UserEventProducer userEventProducer;
 
+    @Mock
+    private JwtUtil jwtUtil;
+
     @InjectMocks
     private UserService userService;
 
@@ -39,8 +42,8 @@ class UserServicePointTest {
     @DisplayName("회원가입 후 가입 축하 포인트 적립이 호출된다")
     void createUser_callsPointService() {
         // given
-        CreateUserRequest request = new CreateUserRequest("홍길동", "hong@test.com");
-        User savedUser = User.builder().id(1L).name("홍길동").email("hong@test.com").build();
+        CreateUserRequest request = new CreateUserRequest("홍길동", "hong@test.com", "password123");
+        User savedUser = User.builder().id(1L).name("홍길동").email("hong@test.com").password("password123").build();
         given(userRepository.existsByEmail("hong@test.com")).willReturn(false);
         given(userRepository.save(any(User.class))).willReturn(savedUser);
         willDoNothing().given(pointServiceClient).earnPoints(1L, 500, "가입 축하 포인트");
