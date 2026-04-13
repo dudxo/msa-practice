@@ -16,7 +16,7 @@ public class PointServiceClient {
 
     private final RestTemplate restTemplate;
 
-    @Value("${point-service.url:http://localhost:8083}")
+    @Value("${point-service.url:http://point-service}")
     private String pointServiceUrl;
 
     @CircuitBreaker(name = "pointService", fallbackMethod = "earnPointsFallback")
